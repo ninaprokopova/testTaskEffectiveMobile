@@ -1,0 +1,309 @@
+definitions:
+  dto.CreatePersonRequest:
+    properties:
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    required:
+    - name
+    - surname
+    type: object
+  dto.CreatePersonResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+        type: object
+    type: object
+  dto.GetPeopleResponse:
+    properties:
+      meta:
+        $ref: '#/definitions/dto.Meta'
+      people:
+        items:
+          $ref: '#/definitions/dto.Person'
+        type: array
+    type: object
+  dto.GetPersonResponse:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nation:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  dto.Meta:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.Person:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nation:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  dto.UpdatePersonRequest:
+    properties:
+      age:
+        minimum: 0
+        type: integer
+      gender:
+        enum:
+        - male
+        - female
+        type: string
+      id:
+        minimum: 1
+        type: integer
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    required:
+    - id
+    type: object
+  dto.UpdatePersonResponse:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/people:
+    get:
+      consumes:
+      - application/json
+      description: Get filtered and paginated list of people
+      parameters:
+      - description: Filter by name
+        in: query
+        name: name
+        type: string
+      - description: Filter by surname
+        in: query
+        name: surname
+        type: string
+      - description: Filter by patronymic
+        in: query
+        name: patronymic
+        type: string
+      - description: Filter by age
+        in: query
+        name: age
+        type: integer
+      - description: Filter by gender
+        in: query
+        name: gender
+        type: string
+      - description: Filter by nationality
+        in: query
+        name: nationality
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        maximum: 100
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Field to sort by (name, surname, age, gender, nationality)
+        in: query
+        name: sort_by
+        type: string
+      - default: false
+        description: Sort in descending order
+        in: query
+        name: sort_desc
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetPeopleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get people by query parameters
+      tags:
+      - people
+  /api/v1/person:
+    patch:
+      consumes:
+      - application/json
+      description: Update person with provided data
+      parameters:
+      - description: Person data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePersonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UpdatePersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update person by ID
+      tags:
+      - persons
+    post:
+      consumes:
+      - application/json
+      description: Create new person with provided data
+      parameters:
+      - description: Person data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePersonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CreatePersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create new person
+      tags:
+      - persons
+  /api/v1/person/{id}:
+    delete:
+      description: Delete person from database by person ID
+      parameters:
+      - description: Person ID
+        in: path
+        minimum: 1
+        name: id
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete person by ID
+      tags:
+      - persons
+    get:
+      consumes:
+      - application/json
+      description: Get person details by person ID
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetPersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get person by ID
+      tags:
+      - persons
+swagger: "2.0"
