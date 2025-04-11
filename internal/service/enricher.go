@@ -16,6 +16,7 @@ type EnricherService struct {
 	ageApi         string
 	nationalizeApi string
 	logger         *slog.Logger
+	client         *http.Client
 }
 
 func NewEnricherService(genderApi, ageApi, nationalizeApi string, logger *slog.Logger) *EnricherService {
@@ -24,6 +25,9 @@ func NewEnricherService(genderApi, ageApi, nationalizeApi string, logger *slog.L
 		ageApi:         ageApi,
 		nationalizeApi: nationalizeApi,
 		logger:         logger.With("service", "enricher"),
+		client: &http.Client{
+			Timeout: 2 * time.Second,
+		},
 	}
 }
 
@@ -35,11 +39,12 @@ func (s *EnricherService) GetGender(ctx context.Context, name string) (gender st
 		"name", name,
 		"start_time", startTime,
 	)
+
 	queryParams := url.Values{}
 	queryParams.Add("name", name)
 	fullURL := fmt.Sprintf("%s?%s", s.genderApi, queryParams.Encode())
 
-	resp, err := http.Get(fullURL)
+	resp, err := s.client.Get(fullURL)
 	if err != nil {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}
@@ -77,7 +82,7 @@ func (s *EnricherService) GetAge(ctx context.Context, name string) (age int, err
 	queryParams.Add("name", name)
 	fullURL := fmt.Sprintf("%s?%s", s.ageApi, queryParams.Encode())
 
-	resp, err := http.Get(fullURL)
+	resp, err := s.client.Get(fullURL)
 	if err != nil {
 		return 0, fmt.Errorf("HTTP request failed: %w", err)
 	}
@@ -114,7 +119,7 @@ func (s *EnricherService) GetNationality(ctx context.Context, name string) (nati
 	queryParams.Add("name", name)
 	fullURL := fmt.Sprintf("%s?%s", s.nationalizeApi, queryParams.Encode())
 
-	resp, err := http.Get(fullURL)
+	resp, err := s.client.Get(fullURL)
 	if err != nil {
 		return "", fmt.Errorf("HTTP request failed: %w", err)
 	}
