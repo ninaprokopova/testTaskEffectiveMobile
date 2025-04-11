@@ -18,8 +18,10 @@ git clone https://github.com/ninaprokopova/testTaskEffectiveMobile
 
 # Скопировать .env.example
 cp .env.example .env
-
-# Заполнить настройки в .env
+```
+### Заполнить настройки в .env
+Ниже пример из файла .env.example
+```
 # Database
 DB_HOST=localhost
 DB_PORT=5432
